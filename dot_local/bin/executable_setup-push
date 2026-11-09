@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Zachytí iba už spravované súbory, nepridáva nové priečinky ani lokálne výnimky.
+chezmoi re-add
+if ! chezmoi verify >/dev/null 2>&1; then
+    echo 'Niektoré zmeny (napr. šablóny) neboli zachytené. Skontroluj chezmoi diff a zosúlaď ich cez chezmoi edit/apply.' >&2
+    exit 1
+fi
+chezmoi git -- diff --stat
+chezmoi git -- add -u
+if ! chezmoi git -- diff --cached --quiet; then
+    chezmoi git -- commit -m "${*:-Aktualizácia spoločných nastavení}"
+fi
+chezmoi git -- push -u origin HEAD

@@ -1,0 +1,91 @@
+# Since Pyprland is very configurable, this is just a basic example config
+# to get you started. For more information, see the Pyprland documentation:
+# https://hyprland-community.github.io/pyprland/
+
+
+# Since You are using Hyde, you can use `hyde-shell` to run pypr commands
+# See  'hyde-shell pypr help' for more information on how to use it!
+
+[pyprland]
+    # pypr has a lot of plugins, but this is just a basic example config
+    # https://hyprland-community.github.io/pyprland/Plugins.html
+    plugins = [ "scratchpads", "external:spotify_workarea" ]
+    plugins_paths = ["{{ .chezmoi.homeDir }}/.config/pypr/plugins"]
+
+# using variables for demonstration purposes (not needed)
+[pyprland.variables]
+    # term_with_class = "hyde-shell app -T" # You cannot set the class for this
+    # term_with_class = "alacritty --class"
+    # term_with_class = "foot --app-id"
+    term_with_class = "kitty --class"
+
+
+[scratchpads.console]
+    # This is a drop-down terminal configuration
+    animation = "fromTop"
+    class     = "console-dropdown"
+    command   = "[term_with_class] console-dropdown"
+    max_size  = "90% 100%"
+    size      = "75% 60%"
+    # Position relative to each notebook display.
+    margin    = "20%"
+
+# Spotify stays running while hidden outside the regular workspaces.
+[scratchpads.spotify]
+    # Hide on leaving the app; keep dialogs and newer windows above it.
+    pinned = false
+    unfocus = "hide"
+    hysteresis = 0.2
+    excludes = ["ferdium", "teams"]
+    animation = "fromTop"
+    command = "spotify"
+    class = "Spotify"
+    match_by = "class"
+    process_tracking = false
+    lazy = true
+    # Initial fallback; spotify_workarea computes actual geometry before showing.
+    size = "98% 90%"
+    margin = 10
+    # Empty offset uses monitor height, scaled once. Percent offsets incorrectly
+    # scale the already-logical client size again (110% / 1.4 = only 79%).
+    offset = ""
+    hide_delay = 0.6
+    close_on_hide = false
+
+# Ferdium uses the same dropdown behavior as Spotify.
+[scratchpads.ferdium]
+    # Hide on leaving the app; keep dialogs and newer windows above it.
+    pinned = false
+    unfocus = "hide"
+    hysteresis = 0.2
+    excludes = ["spotify", "teams"]
+    animation = "fromTop"
+    command = "ferdium"
+    class = "ferdium"
+    match_by = "class"
+    process_tracking = false
+    lazy = true
+    size = "98% 90%"
+    margin = 10
+    offset = ""
+    hide_delay = 0.6
+    close_on_hide = false
+
+# Microsoft Teams uses the same dropdown behavior as Ferdium.
+[scratchpads.teams]
+    # Hide on leaving the app; keep dialogs and newer windows above it.
+    pinned = false
+    unfocus = "hide"
+    hysteresis = 0.2
+    excludes = ["spotify", "ferdium"]
+    animation = "fromTop"
+    command = "teams-for-linux --gtk-version=3"
+    class = "teams-for-linux"
+    match_by = "class"
+    process_tracking = false
+    lazy = true
+    size = "98% 90%"
+    margin = 10
+    offset = ""
+    hide_delay = 0.6
+    close_on_hide = false

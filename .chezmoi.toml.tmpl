@@ -1,0 +1,5 @@
+{{- $desktop := promptBoolOnce . "hydeDesktop" "Synchronizovat aj Hyprland s HyDE (Lua konfiguracia)?" false -}}
+sourceDir = {{ .chezmoi.sourceDir | quote }}
+
+[data]
+hydeDesktop = {{ $desktop }}

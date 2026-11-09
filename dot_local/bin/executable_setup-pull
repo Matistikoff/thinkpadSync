@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ -n $(chezmoi git -- status --porcelain) ]] || ! chezmoi verify >/dev/null 2>&1; then
+    echo 'Máš lokálne zmeny. Najprv skontroluj chezmoi diff a použi setup-push.' >&2
+    exit 1
+fi
+chezmoi git -- pull --ff-only
+repo=$(chezmoi source-path)
+python3 "$repo/scripts/backup.py"
+chezmoi diff
+chezmoi apply --error-on-conflict
+echo 'Nastavenia načítané. Otvor nový terminál; podľa potreby obnov konfiguráciu aplikácií.'

@@ -1,0 +1,75 @@
+configuration {
+    show-icons: true;
+    font: "Cantarell 12";
+}
+
+@theme "~/.config/rofi/theme.rasi"
+
+* {
+    background-color: transparent;
+    text-color: @main-fg;
+}
+window {
+    width: 75%;
+    height: 75%;
+    location: center;
+    anchor: center;
+    fullscreen: false;
+    background-color: @main-ex;
+    border: 2px;
+    border-color: @main-br;
+    border-radius: 16px;
+    padding: 20px;
+}
+mainbox {
+    orientation: vertical;
+    spacing: 16px;
+    children: [ "inputbar", "listview" ];
+}
+inputbar {
+    children: [ "prompt", "entry" ];
+    spacing: 14px;
+    padding: 10px;
+}
+prompt { text-color: @main-fg; }
+entry { placeholder: "Hľadať obrázok…"; expand: true; }
+listview {
+    columns: 1;
+    lines: 3;
+    fixed-columns: true;
+    fixed-height: true;
+    dynamic: false;
+    reverse: false;
+    scrollbar: true;
+    spacing: 12px;
+    padding: 0px;
+}
+element {
+    orientation: horizontal;
+    children: [ "element-icon", "element-text" ];
+    spacing: 20px;
+    padding: 12px;
+    border: 2px;
+    border-color: transparent;
+    border-radius: 10px;
+    background-color: @main-bg;
+    text-color: @main-fg;
+}
+element selected.normal, element selected.active, element selected.urgent {
+    background-color: @main-bg;
+    border-color: @main-fg;
+    text-color: @main-fg;
+}
+element-icon {
+    size: 144px;
+    expand: false;
+    vertical-align: 0.5;
+    horizontal-align: 0.5;
+}
+element-text {
+    expand: true;
+    vertical-align: 0.5;
+    horizontal-align: 0.0;
+    text-color: inherit;
+}
+scrollbar { width: 6px; handle-color: @main-fg; }

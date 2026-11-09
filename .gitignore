@@ -1,0 +1,5 @@
+*.local.*
+*.bak
+*.swp
+__pycache__/
+.env

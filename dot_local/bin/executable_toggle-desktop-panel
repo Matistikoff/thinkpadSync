@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+"""Forward panel toggles without interfering with Pyprland animations."""
+import os
+import sys
+
+
+def main():
+    commands = {
+        "spotify": ["hyde-shell", "pypr", "toggle", "spotify"],
+        "waybar": ["hyde-shell", "waybar", "--hide"],
+    }
+    if len(sys.argv) != 2 or sys.argv[1] not in commands:
+        raise SystemExit("Usage: toggle-desktop-panel spotify|waybar")
+    command = commands[sys.argv[1]]
+    os.execvp(command[0], command)
+
+
+if __name__ == "__main__":
+    main()

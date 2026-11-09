@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -u
+umask 077
+
+notify() { notify-send -a 'Nahrávanie obrazovky' "$1" "${2:-}" 2>/dev/null || true; }
+runtime="${XDG_RUNTIME_DIR:?}/hyde-screen-recording"
+mkdir -p "$runtime" || exit 1
+exec 9>"$runtime/lock"
+if ! flock -n 9; then
+    if read -r pid < "$runtime/pid" 2>/dev/null &&
+        [[ "$pid" =~ ^[0-9]+$ ]] &&
+        [[ "$(cat "/proc/$pid/comm" 2>/dev/null)" == wf-recorder ]]; then
+        kill -INT "$pid"
+    else
+        notify 'Nahrávanie sa pripravuje alebo ukladá' 'Dokonči výber oblasti alebo zadanie názvu videa.'
+    fi
+    exit 0
+fi
+
+for app in wf-recorder slurp pactl rofi; do
+    if ! command -v "$app" >/dev/null; then
+        notify 'Chýba program na nahrávanie' "V termináli spusti: sudo pacman -S $app"
+        exit 1
+    fi
+done
+rm -f "$runtime/pid"
+trap 'rm -f "$runtime/pid"' EXIT
+geometry=$(slurp 9>&-) || exit 0
+[[ -n "$geometry" ]] || exit 0
+sink=$(pactl get-default-sink 2>/dev/null) || {
+    notify 'Zvuk nie je dostupný' 'Nepodarilo sa zistiť zvukový výstup; nahrávanie sa nespustilo.'
+    exit 1
+}
+[[ -n "$sink" ]] || exit 1
+mkdir -p "$HOME/Videos" || exit 1
+default_name="Nahravka-$(date +%Y-%m-%d_%H-%M-%S-%N)"
+staging=$(mktemp -d "$HOME/Videos/.nahravka-XXXXXXXX") || exit 1
+file="$staging/video.mp4"
+wf-recorder --audio="${sink}.monitor" -C aac -g "$geometry" -f "$file" >"$runtime/recorder.log" 2>&1 9>&- &
+pid=$!
+printf '%s\n' "$pid" > "$runtime/pid"
+notify 'Nahrávanie so zvukom spustené' 'Nahráva sa zvuk aplikácií. Zastavíš ho cez Mod + Ctrl + R.'
+wait "$pid"
+status=$?
+rm -f "$runtime/pid"
+if [[ -s "$file" ]] && (( status == 0 || status == 130 )); then
+    name=$(rofi -dmenu -p 'Názov videa' -filter "$default_name" \
+        -mesg 'Enter: uložiť • Escape: použiť pôvodný názov • prípona .mp4 sa doplní' \
+        -theme-str 'listview { lines: 0; }' </dev/null 9>&-) || name="$default_name"
+    # A name is a single filename, never a path supplied by the dialog.
+    name=${name//\//_}
+    name=${name//$'\n'/_}
+    name=${name//$'\r'/_}
+    name=${name%.mp4}
+    [[ -n "${name//[[:space:]]/}" ]] || name="$default_name"
+    destination="$HOME/Videos/$name.mp4"
+    suffix=1
+    # Hard-link within Videos publishes atomically without overwriting a file.
+    while ! ln -- "$file" "$destination" 2>/dev/null; do
+        if [[ -e "$destination" || -L "$destination" ]]; then
+            destination="$HOME/Videos/$name ($suffix).mp4"
+            ((suffix+=1))
+        else
+            notify 'Video sa nepodarilo pomenovať' "Nahrávka zostala zachovaná: $file"
+            exit 1
+        fi
+    done
+    rm -- "$file"
+    rmdir -- "$staging"
+    notify 'Video uložené' "$destination"
+else
+    notify 'Nahrávanie zlyhalo' "Podrobnosti: $runtime/recorder.log; rozpracované video: $file"
+fi

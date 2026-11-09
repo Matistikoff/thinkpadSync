@@ -1,0 +1,14 @@
+README.md
+AGENTS.md
+docs
+scripts
+.gitignore
+{{ if not .hydeDesktop }}
+.config/hypr
+.config/pypr
+.config/rofi
+.local/bin/toggle-desktop-panel
+.local/bin/toggle-screen-recording
+.local/bin/wallpaper
+.config/fish/functions/bindy.fish
+{{ end }}
